@@ -12,29 +12,35 @@ Create two workflow files:
 
 ```
 name: Apply PR size label
+
 on: pull_request
+
 jobs:
   apply_pr_size_label:
     runs-on: ubuntu-latest
     steps:
-        uses: levindixon/pr-size-helper-action@v1.0.0
+      - uses: levindixon/pr-size-helper-action@v1
         env:
           GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
+
 ```
 
 `.github/workflows/track-large-pr-reasons.yml`
 
 ```
 name: Track large PR reasons
+
 on: issue_comment
+
 jobs:
   track_large_pr_reasons:
     if: ${{ github.event.issue.pull_request && contains(github.event.comment.body, '!reason') }}
     runs-on: ubuntu-latest
     steps:
-        uses: levindixon/pr-size-helper-action@v1.0.0
+      - uses: levindixon/pr-size-helper-action@v1
         env:
           GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
+
 ```
 
 ## Configuration
@@ -49,7 +55,7 @@ The following environment variables are supported:
 You can configure the environment variables in the workflow file like this:
 
 ```yaml
-        env:
-          GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
-          IGNORED: ".*\n!.gitignore\nyarn.lock\ngenerated/**"
+env:
+  GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
+  IGNORED: ".*\n!.gitignore\nyarn.lock\ngenerated/**"
 ```
