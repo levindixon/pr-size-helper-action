@@ -52,7 +52,7 @@ The following environment variables are supported:
   calculating the change size of the pull request. Lines starting with `#` are
   ignored and files matching lines starting with `!` are always included.
 
-You can configure the environment variables in the workflow file like this:
+You can configure the environment variables in the `apply-pr-size-label.yml` workflow file like this:
 
 ```yaml
 env:
