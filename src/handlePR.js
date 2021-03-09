@@ -31,11 +31,11 @@ const handlePR = async (
 
   const changedLines = getChangedLines(isIgnored, pullRequestDiff.data);
 
-  core.info("Changed lines:", changedLines);
+  core.info(`Changed lines: ${changedLines}`);
 
   const sizeLabel = getSizeLabel(changedLines);
 
-  core.info("Matching label:", sizeLabel);
+  core.info(`Matching label: ${sizeLabel}`);
 
   const sizeLabelColor = LABEL_COLORS[sizeLabel];
 
@@ -50,7 +50,7 @@ const handlePR = async (
   }
 
   if (add.length > 0) {
-    core.info("Adding labels:", add);
+    core.info(`Adding labels: ${add}`);
 
     await octokit.issues.addLabels({
       owner,
@@ -72,7 +72,7 @@ If you have time, please leave a comment prefixed with \`!reason\` explaining wh
   }
 
   for (const label of remove) {
-    core.info("Removing label:", label);
+    core.info(`Removing label: ${label}`);
 
     try {
       await octokit.issues.removeLabel({

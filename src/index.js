@@ -35,7 +35,7 @@ const run = async () => {
     core.debug("Event payload:", eventDataStr);
 
     if (!HANDLED_ACTION_TYPES.includes(eventData.action)) {
-      core.info("Action will be ignored:", eventData.action);
+      core.info(`Action will be ignored: ${eventData.action}`);
 
       return;
     }
