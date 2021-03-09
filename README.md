@@ -51,6 +51,14 @@ The following environment variables are supported:
   separated by newlines. Files matching these expressions will not count when
   calculating the change size of the pull request. Lines starting with `#` are
   ignored and files matching lines starting with `!` are always included.
+- `PROMPT_THRESHOLD`: Pull requests created with a combined additions/deletions greater or equal to this value will trigger a friendly message prompting the pull request author to provide a reason for the size of the pull request. Defaults to 500.
+- `S` | `M` | `L` | `XL` | `XXL`: Setting one, some, or all of these will change the pull request size labelling. Pull requests with a size between 0 and `S` will be labeled as `size/XS`, PRs with a size between `S` and `M` will be labeled as `S` and so on. Defaults:
+  - `XS`  0 - 9
+  - `S` 10 - 29
+  - `M` 30 - 99
+  - `L` 100 - 499
+  - `XL` 500 - 999
+  - `XXL` >= 1000
 
 You can configure the environment variables in the `apply-pr-size-label.yml` workflow file like this:
 
@@ -58,4 +66,11 @@ You can configure the environment variables in the `apply-pr-size-label.yml` wor
 env:
   GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
   IGNORED: ".*\n!.gitignore\nyarn.lock\ngenerated/**"
+  PROMPT_THRESHOLD: 500
+  XS: 20
+  S: 10
+  M: 30
+  L: 100
+  XL: 500
+  XXL: 1000
 ```
