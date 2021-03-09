@@ -19,7 +19,7 @@ jobs:
   apply_pr_size_label:
     runs-on: ubuntu-latest
     steps:
-      - uses: levindixon/pr-size-helper-action@v1
+      - uses: levindixon/pr-size-helper-action@v1.0.0
         env:
           GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
 
@@ -37,7 +37,7 @@ jobs:
     if: ${{ github.event.issue.pull_request && contains(github.event.comment.body, '!reason') }}
     runs-on: ubuntu-latest
     steps:
-      - uses: levindixon/pr-size-helper-action@v1
+      - uses: levindixon/pr-size-helper-action@v1.0.0
         env:
           GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
 
@@ -53,7 +53,7 @@ The following environment variables are supported:
   ignored and files matching lines starting with `!` are always included.
 - `PROMPT_THRESHOLD`: Pull requests created with a combined additions/deletions greater or equal to this value will trigger a friendly message prompting the pull request author to provide a reason for the size of the pull request. Defaults to 500.
 - `S` | `M` | `L` | `XL` | `XXL`: Setting one, some, or all of these will change the pull request size labelling. Pull requests with a size between 0 and `S` will be labeled as `size/XS`, PRs with a size between `S` and `M` will be labeled as `S` and so on. Defaults:
-  - `XS`  0 - 9
+  - `XS` 0 - 9
   - `S` 10 - 29
   - `M` 30 - 99
   - `L` 100 - 499
