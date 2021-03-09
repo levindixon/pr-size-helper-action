@@ -7915,7 +7915,7 @@ const handleReasonComment = async (
       title: "[ PR Size Helper ]: Digest",
       body: `Welcome to your PR Size Helper Digest!
 
-This issue collects and indexes all of the \`!reason\` comments captured in pull requests labeled as \`size/XL\` and \`size/XXL\`
+This issue collects and indexes all of the \`!reason\` prefixed comments left in pull requests.
 
 Here are some helpful links:
 
