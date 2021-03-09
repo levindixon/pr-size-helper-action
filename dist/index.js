@@ -7771,17 +7771,20 @@ const LABEL_COLORS = {
 
 const SIZES = {
   0: "XS",
-  10: "S",
-  30: "M",
-  100: "L",
-  500: "XL",
-  1000: "XXL",
+  [Number.parseInt(process.env.S) || 10]: "S",
+  [Number.parseInt(process.env.M) || 30]: "M",
+  [Number.parseInt(process.env.L) || 100]: "L",
+  [Number.parseInt(process.env.XL) || 500]: "XL",
+  [Number.parseInt(process.env.XXL) || 1000]: "XXL",
 };
+
+const PROMPT_THRESHOLD = process.env.PROMPT_THRESHOLD || 500;
 
 module.exports = {
   SIZES,
   LABEL_COLORS,
   HANDLED_ACTION_TYPES,
+  PROMPT_THRESHOLD,
 };
 
 
@@ -7792,7 +7795,7 @@ module.exports = {
 
 const core = __nccwpck_require__(2186);
 
-const { LABEL_COLORS } = __nccwpck_require__(4438);
+const { LABEL_COLORS, PROMPT_THRESHOLD } = __nccwpck_require__(4438);
 const {
   parseIgnored,
   getChangedLines,
@@ -7851,7 +7854,7 @@ const handlePR = async (
       labels: add,
     });
 
-    if (sizeLabel === "size/XL" || sizeLabel === "size/XXL") {
+    if (changedLines >= PROMPT_THRESHOLD) {
       await octokit.issues.createComment({
         owner,
         repo,

@@ -1,6 +1,6 @@
 const core = require("@actions/core");
 
-const { LABEL_COLORS } = require("./constants");
+const { LABEL_COLORS, PROMPT_THRESHOLD } = require("./constants");
 const {
   parseIgnored,
   getChangedLines,
@@ -59,7 +59,7 @@ const handlePR = async (
       labels: add,
     });
 
-    if (sizeLabel === "size/XL" || sizeLabel === "size/XXL") {
+    if (changedLines >= PROMPT_THRESHOLD) {
       await octokit.issues.createComment({
         owner,
         repo,

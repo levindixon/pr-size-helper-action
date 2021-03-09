@@ -11,15 +11,18 @@ const LABEL_COLORS = {
 
 const SIZES = {
   0: "XS",
-  10: "S",
-  30: "M",
-  100: "L",
-  500: "XL",
-  1000: "XXL",
+  [Number.parseInt(process.env.S) || 10]: "S",
+  [Number.parseInt(process.env.M) || 30]: "M",
+  [Number.parseInt(process.env.L) || 100]: "L",
+  [Number.parseInt(process.env.XL) || 500]: "XL",
+  [Number.parseInt(process.env.XXL) || 1000]: "XXL",
 };
+
+const PROMPT_THRESHOLD = process.env.PROMPT_THRESHOLD || 500;
 
 module.exports = {
   SIZES,
   LABEL_COLORS,
   HANDLED_ACTION_TYPES,
+  PROMPT_THRESHOLD,
 };
