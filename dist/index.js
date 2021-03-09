@@ -7922,7 +7922,7 @@ Here are some helpful links:
 All **open** PRs with a [\`size/XXL\`](https://github.com/${owner}/${repo}/pulls?q=is%3Apr+is%3Aopen+label%3Asize%2FXXL) [\`size/XL\`](https://github.com/${owner}/${repo}/pulls?q=is%3Apr+is%3Aopen+label%3Asize%2FXL) [\`size/L\`](https://github.com/${owner}/${repo}/pulls?q=is%3Apr+is%3Aopen+label%3Asize%2FL) [\`size/M\`](https://github.com/${owner}/${repo}/pulls?q=is%3Apr+is%3Aopen+label%3Asize%2FM) [\`size/S\`](https://github.com/${owner}/${repo}/pulls?q=is%3Apr+is%3Aopen+label%3Asize%2FS) [\`size/XS\`](https://github.com/${owner}/${repo}/pulls?q=is%3Apr+is%3Aopen+label%3Asize%2FXS)
 All **closed** PRs with a [\`size/XXL\`](https://github.com/${owner}/${repo}/pulls?q=is%3Apr+is%3Aclosed+label%3Asize%2FXXL) [\`size/XL\`](https://github.com/${owner}/${repo}/pulls?q=is%3Apr+is%3Aclosed+label%3Asize%2FXL) [\`size/L\`](https://github.com/${owner}/${repo}/pulls?q=is%3Apr+is%3Aclosed+label%3Asize%2FL) [\`size/M\`](https://github.com/${owner}/${repo}/pulls?q=is%3Apr+is%3Aclosed+label%3Asize%2FM) [\`size/S\`](https://github.com/${owner}/${repo}/pulls?q=is%3Apr+is%3Aclosed+label%3Asize%2FS) [\`size/XS\`](https://github.com/${owner}/${repo}/pulls?q=is%3Apr+is%3Aclosed+label%3Asize%2FXS)
 
-_Note: The title of this issue is important. If you decide to change it, the PR Size Helper action will create a new "[ PR Size Helper ]: Digest" issue the next time someone on your team creates a \`!reason\` comment._`,
+_Note: The title of this issue is important. If you decide to change it, the PR Size Helper action will create a new "[ PR Size Helper ]: Digest" issue the next time someone creates a \`!reason\` prefixed comment._`,
     });
   }
 
