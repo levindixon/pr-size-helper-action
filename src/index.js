@@ -78,7 +78,8 @@ const run = async () => {
         eventData.issue.labels,
         eventData.issue.user.login,
         eventData.comment.html_url,
-        eventData.comment.body
+        eventData.comment.body,
+        eventData.comment.user.login
       );
 
       core.info("Success!");

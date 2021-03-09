@@ -7,7 +7,8 @@ const handleReasonComment = async (
   prLabels,
   prAuthorLogin,
   reasonCommentUrl,
-  reasonCommentBody
+  reasonCommentBody,
+  reasonCommentAuthorLogin
 ) => {
   const existingIssues = await octokit.search.issuesAndPullRequests({
     q: `is:open is:issue repo:${owner}/${repo} in:title [ PR Size Helper ]: Digest`,
@@ -55,7 +56,7 @@ _Note: The title of this issue is important. If you decide to change it, the PR 
     owner,
     repo,
     issue_number: prNumber,
-    body: `Thanks! I've added that reason here: ${comment.data.html_url} 📝`,
+    body: `Thanks @${reasonCommentAuthorLogin}! I've added your reason here: ${comment.data.html_url} 📝`,
   });
 };
 
