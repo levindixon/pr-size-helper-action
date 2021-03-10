@@ -72,3 +72,19 @@ env:
   XL: 500
   XXL: 1000
 ```
+
+## Acknowledgments
+
+- 📝 Repo templated using [`actions/javascript-action`](https://github.com/actions/javascript-action) 📝 
+
+- ✨ Guided by the [Creating a JavaScript action](https://docs.github.com/en/actions/creating-actions/creating-a-javascript-action) guide ✨
+
+- 🙇‍♂️ Ignore and labeling functionality forked from [`pascalgn/size-label-action`](https://github.com/pascalgn/size-label-action) 🙇‍♂️
+
+- 💬 Prompt inspiration from [`CodelyTV/pr-size-labeler`](https://github.com/CodelyTV/pr-size-labeler) 💬
+
+- 🏷 Size labels borrowed from [`kubernetes/kubernetes`](https://github.com/kubernetes/kubernetes/labels?q=size) 🏷
+
+## License
+
+[MIT](LICENSE)
