@@ -31,7 +31,7 @@ const handleReasonComment = async (
     `${
       patOctokit
         ? "Using ACCESS_TOKEN to search"
-        : "Not using ACCESS_TOKEN to search"
+        : "Using GITHUB_TOKEN to search"
     }`
   );
 
@@ -48,6 +48,8 @@ const handleReasonComment = async (
   let newIssue;
 
   if (!existingIssue) {
+    core.info("No existing digest issue found, creating one...");
+
     newIssue = await (patOctokit || octokit).issues.create({
       issueOwner,
       issueRepo,
