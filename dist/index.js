@@ -7897,6 +7897,7 @@ module.exports = handlePR;
 /***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
 
 const { Octokit } = __nccwpck_require__(5375);
+const core = __nccwpck_require__(2186);
 
 const handleReasonComment = async (
   octokit,
@@ -7916,11 +7917,21 @@ const handleReasonComment = async (
   let patOctokit;
 
   if (githubPAT) {
+    core.info("Initializing Octokit with ACCESS_TOKEN...");
+
     patOctokit = new Octokit({
       auth: `token ${githubPAT}`,
       userAgent: "levindixon/pr-size-helper-action",
     });
   }
+
+  core.info(
+    `${
+      patOctokit
+        ? "Using ACCESS_TOKEN to search"
+        : "Not using ACCESS_TOKEN to search"
+    }`
+  );
 
   const existingIssues = await (
     patOctokit || octokit
@@ -8066,10 +8077,15 @@ const run = async () => {
       let configuredIssueRepo;
 
       if (DIGEST_ISSUE_REPO && ACCESS_TOKEN) {
+        core.info("DIGEST_ISSUE_REPO and ACCESS_TOKEN provided...");
+        core.info(`Parsing DIGEST_ISSUE_REPO: ${DIGEST_ISSUE_REPO}`);
         try {
           [configuredIssueOwner, configuredIssueRepo] = url
             .parse(DIGEST_ISSUE_REPO)
             .pathname.split("/");
+
+          core.info(`configuredIssueOwner is: ${configuredIssueOwner}`);
+          core.info(`configuredIssueRepo is : ${configuredIssueRepo}`);
         } catch (e) {
           throw new Error(
             `Invalid DIGEST_ISSUE_REPO url: ${DIGEST_ISSUE_REPO} Format should be as follows: https://github.com/owner/repo`

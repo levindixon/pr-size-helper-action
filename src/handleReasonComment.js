@@ -1,4 +1,5 @@
 const { Octokit } = require("@octokit/rest");
+const core = require("@actions/core");
 
 const handleReasonComment = async (
   octokit,
@@ -18,11 +19,21 @@ const handleReasonComment = async (
   let patOctokit;
 
   if (githubPAT) {
+    core.info("Initializing Octokit with ACCESS_TOKEN...");
+
     patOctokit = new Octokit({
       auth: `token ${githubPAT}`,
       userAgent: "levindixon/pr-size-helper-action",
     });
   }
+
+  core.info(
+    `${
+      patOctokit
+        ? "Using ACCESS_TOKEN to search"
+        : "Not using ACCESS_TOKEN to search"
+    }`
+  );
 
   const existingIssues = await (
     patOctokit || octokit

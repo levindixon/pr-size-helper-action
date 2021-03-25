@@ -79,10 +79,15 @@ const run = async () => {
       let configuredIssueRepo;
 
       if (DIGEST_ISSUE_REPO && ACCESS_TOKEN) {
+        core.info("DIGEST_ISSUE_REPO and ACCESS_TOKEN provided...");
+        core.info(`Parsing DIGEST_ISSUE_REPO: ${DIGEST_ISSUE_REPO}`);
         try {
           [configuredIssueOwner, configuredIssueRepo] = url
             .parse(DIGEST_ISSUE_REPO)
             .pathname.split("/");
+
+          core.info(`configuredIssueOwner is: ${configuredIssueOwner}`);
+          core.info(`configuredIssueRepo is : ${configuredIssueRepo}`);
         } catch (e) {
           throw new Error(
             `Invalid DIGEST_ISSUE_REPO url: ${DIGEST_ISSUE_REPO} Format should be as follows: https://github.com/owner/repo`
