@@ -1,3 +1,5 @@
+const { Octokit } = require("@octokit/rest");
+
 const handleReasonComment = async (
   octokit,
   issueRepo,
