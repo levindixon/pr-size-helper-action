@@ -7780,11 +7780,17 @@ const SIZES = {
 
 const PROMPT_THRESHOLD = process.env.PROMPT_THRESHOLD || 500;
 
+const DIGEST_ISSUE_REPO = process.env.DIGEST_ISSUE_REPO || null;
+
+const ACCESS_TOKEN = process.env.ACCESS_TOKEN || null;
+
 module.exports = {
   SIZES,
   LABEL_COLORS,
   HANDLED_ACTION_TYPES,
   PROMPT_THRESHOLD,
+  DIGEST_ISSUE_REPO,
+  ACCESS_TOKEN,
 };
 
 
@@ -7888,10 +7894,15 @@ module.exports = handlePR;
 /***/ }),
 
 /***/ 3953:
-/***/ ((module) => {
+/***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
+
+const { Octokit } = __nccwpck_require__(5375);
+const core = __nccwpck_require__(2186);
 
 const handleReasonComment = async (
   octokit,
+  issueRepo,
+  issueOwner,
   repo,
   owner,
   prUrl,
@@ -7900,39 +7911,74 @@ const handleReasonComment = async (
   prAuthorLogin,
   reasonCommentUrl,
   reasonCommentBody,
-  reasonCommentAuthorLogin
+  reasonCommentAuthorLogin,
+  githubPAT
 ) => {
-  const existingIssues = await octokit.search.issuesAndPullRequests({
-    q: `is:open is:issue repo:${owner}/${repo} in:title [ PR Size Helper ]: Digest`,
+  let patOctokit;
+
+  if (githubPAT) {
+    core.info("Initializing Octokit with ACCESS_TOKEN...");
+
+    patOctokit = new Octokit({
+      auth: `token ${githubPAT}`,
+      userAgent: "levindixon/pr-size-helper-action",
+    });
+  }
+
+  core.info(
+    `${
+      patOctokit
+        ? "Using ACCESS_TOKEN to search"
+        : "Using GITHUB_TOKEN to search"
+    }`
+  );
+
+  const existingIssues = await (
+    patOctokit || octokit
+  ).search.issuesAndPullRequests({
+    q: `is:open is:issue repo:${issueOwner}/${issueRepo} in:title [ PR Size Helper ]: Digest`,
   });
 
   const existingIssue = existingIssues.data.items.find(
     (issue) => issue.title === "[ PR Size Helper ]: Digest"
   );
 
+  core.info(
+    existingIssue
+      ? "Existing digest issue found!"
+      : "No existing digest issue found."
+  );
+
   let newIssue;
 
   if (!existingIssue) {
-    newIssue = await octokit.issues.create({
-      owner,
-      repo,
+    core.info("Creating new digest issue...");
+
+    newIssue = await (patOctokit || octokit).issues.create({
+      owner: issueOwner,
+      repo: issueRepo,
       title: "[ PR Size Helper ]: Digest",
       body: `Welcome to your PR Size Helper Digest!
 
 This issue collects and indexes all of the \`!reason\` prefixed comments left in pull requests.
-
-Here are some helpful links:
+${
+  issueRepo !== repo
+    ? ``
+    : `Here are some helpful links:
 
 - All **open** PRs labelled [\`size/XXL\`](https://github.com/${owner}/${repo}/pulls?q=is%3Apr+is%3Aopen+label%3Asize%2FXXL) [\`size/XL\`](https://github.com/${owner}/${repo}/pulls?q=is%3Apr+is%3Aopen+label%3Asize%2FXL) [\`size/L\`](https://github.com/${owner}/${repo}/pulls?q=is%3Apr+is%3Aopen+label%3Asize%2FL) [\`size/M\`](https://github.com/${owner}/${repo}/pulls?q=is%3Apr+is%3Aopen+label%3Asize%2FM) [\`size/S\`](https://github.com/${owner}/${repo}/pulls?q=is%3Apr+is%3Aopen+label%3Asize%2FS) [\`size/XS\`](https://github.com/${owner}/${repo}/pulls?q=is%3Apr+is%3Aopen+label%3Asize%2FXS)
-- All **closed** PRs labelled [\`size/XXL\`](https://github.com/${owner}/${repo}/pulls?q=is%3Apr+is%3Aclosed+label%3Asize%2FXXL) [\`size/XL\`](https://github.com/${owner}/${repo}/pulls?q=is%3Apr+is%3Aclosed+label%3Asize%2FXL) [\`size/L\`](https://github.com/${owner}/${repo}/pulls?q=is%3Apr+is%3Aclosed+label%3Asize%2FL) [\`size/M\`](https://github.com/${owner}/${repo}/pulls?q=is%3Apr+is%3Aclosed+label%3Asize%2FM) [\`size/S\`](https://github.com/${owner}/${repo}/pulls?q=is%3Apr+is%3Aclosed+label%3Asize%2FS) [\`size/XS\`](https://github.com/${owner}/${repo}/pulls?q=is%3Apr+is%3Aclosed+label%3Asize%2FXS)
+- All **closed** PRs labelled [\`size/XXL\`](https://github.com/${owner}/${repo}/pulls?q=is%3Apr+is%3Aclosed+label%3Asize%2FXXL) [\`size/XL\`](https://github.com/${owner}/${repo}/pulls?q=is%3Apr+is%3Aclosed+label%3Asize%2FXL) [\`size/L\`](https://github.com/${owner}/${repo}/pulls?q=is%3Apr+is%3Aclosed+label%3Asize%2FL) [\`size/M\`](https://github.com/${owner}/${repo}/pulls?q=is%3Apr+is%3Aclosed+label%3Asize%2FM) [\`size/S\`](https://github.com/${owner}/${repo}/pulls?q=is%3Apr+is%3Aclosed+label%3Asize%2FS) [\`size/XS\`](https://github.com/${owner}/${repo}/pulls?q=is%3Apr+is%3Aclosed+label%3Asize%2FXS)`
+}
 
 _Note: The title of this issue is important. If you decide to change it, the PR Size Helper action will create a new "[ PR Size Helper ]: Digest" issue the next time someone creates a \`!reason\` prefixed PR comment._`,
     });
   }
 
-  const comment = await octokit.issues.createComment({
-    owner,
-    repo,
+  core.info("Leaving reason comment...");
+
+  const comment = await (patOctokit || octokit).issues.createComment({
+    owner: issueOwner,
+    repo: issueRepo,
     issue_number: existingIssue ? existingIssue.number : newIssue.data.number,
     body: `## ${prUrl}
 
@@ -7943,6 +7989,8 @@ _Note: The title of this issue is important. If you decide to change it, the PR 
   ## [Reason](${reasonCommentUrl})
   >  ${reasonCommentBody.replace("!reason", "")}`,
   });
+
+  core.info("Thanking reason author and linking to digest issue...");
 
   await octokit.issues.createComment({
     owner,
@@ -7961,6 +8009,7 @@ module.exports = handleReasonComment;
 /***/ ((__unused_webpack_module, __unused_webpack_exports, __nccwpck_require__) => {
 
 const process = __nccwpck_require__(1765);
+const url = __nccwpck_require__(8835);
 
 const core = __nccwpck_require__(2186);
 const { Octokit } = __nccwpck_require__(5375);
@@ -7969,7 +8018,11 @@ const handleReasonComment = __nccwpck_require__(3953);
 const handlePR = __nccwpck_require__(9680);
 
 const { readFile } = __nccwpck_require__(1608);
-const { HANDLED_ACTION_TYPES } = __nccwpck_require__(4438);
+const {
+  HANDLED_ACTION_TYPES,
+  DIGEST_ISSUE_REPO,
+  ACCESS_TOKEN,
+} = __nccwpck_require__(4438);
 
 const run = async () => {
   try {
@@ -8032,8 +8085,34 @@ const run = async () => {
     ) {
       core.info("Handling reason comment...");
 
+      let configuredIssueOwner;
+      let configuredIssueRepo;
+
+      if (DIGEST_ISSUE_REPO && ACCESS_TOKEN) {
+        core.info("DIGEST_ISSUE_REPO and ACCESS_TOKEN provided...");
+        core.info(`Parsing DIGEST_ISSUE_REPO: ${DIGEST_ISSUE_REPO}`);
+        try {
+          configuredIssueOwner = url
+            .parse(DIGEST_ISSUE_REPO)
+            .pathname.split("/")[1];
+
+          configuredIssueRepo = url
+            .parse(DIGEST_ISSUE_REPO)
+            .pathname.split("/")[2];
+
+          core.info(`configuredIssueOwner is: ${configuredIssueOwner}`);
+          core.info(`configuredIssueRepo is : ${configuredIssueRepo}`);
+        } catch (e) {
+          throw new Error(
+            `Invalid DIGEST_ISSUE_REPO url: ${DIGEST_ISSUE_REPO} Format should be as follows: https://github.com/owner/repo`
+          );
+        }
+      }
+
       await handleReasonComment(
         octokit,
+        configuredIssueRepo || eventData.repository.name,
+        configuredIssueOwner || eventData.repository.owner.login,
         eventData.repository.name,
         eventData.repository.owner.login,
         eventData.issue.html_url,
@@ -8042,7 +8121,8 @@ const run = async () => {
         eventData.issue.user.login,
         eventData.comment.html_url,
         eventData.comment.body,
-        eventData.comment.user.login
+        eventData.comment.user.login,
+        ACCESS_TOKEN
       );
 
       core.info("Success!");

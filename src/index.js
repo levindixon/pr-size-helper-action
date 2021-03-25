@@ -1,4 +1,5 @@
 const process = require("process");
+const url = require("url");
 
 const core = require("@actions/core");
 const { Octokit } = require("@octokit/rest");
@@ -7,7 +8,11 @@ const handleReasonComment = require("./handleReasonComment");
 const handlePR = require("./handlePR");
 
 const { readFile } = require("./utils");
-const { HANDLED_ACTION_TYPES } = require("./constants");
+const {
+  HANDLED_ACTION_TYPES,
+  DIGEST_ISSUE_REPO,
+  ACCESS_TOKEN,
+} = require("./constants");
 
 const run = async () => {
   try {
@@ -70,8 +75,34 @@ const run = async () => {
     ) {
       core.info("Handling reason comment...");
 
+      let configuredIssueOwner;
+      let configuredIssueRepo;
+
+      if (DIGEST_ISSUE_REPO && ACCESS_TOKEN) {
+        core.info("DIGEST_ISSUE_REPO and ACCESS_TOKEN provided...");
+        core.info(`Parsing DIGEST_ISSUE_REPO: ${DIGEST_ISSUE_REPO}`);
+        try {
+          configuredIssueOwner = url
+            .parse(DIGEST_ISSUE_REPO)
+            .pathname.split("/")[1];
+
+          configuredIssueRepo = url
+            .parse(DIGEST_ISSUE_REPO)
+            .pathname.split("/")[2];
+
+          core.info(`configuredIssueOwner is: ${configuredIssueOwner}`);
+          core.info(`configuredIssueRepo is : ${configuredIssueRepo}`);
+        } catch (e) {
+          throw new Error(
+            `Invalid DIGEST_ISSUE_REPO url: ${DIGEST_ISSUE_REPO} Format should be as follows: https://github.com/owner/repo`
+          );
+        }
+      }
+
       await handleReasonComment(
         octokit,
+        configuredIssueRepo || eventData.repository.name,
+        configuredIssueOwner || eventData.repository.owner.login,
         eventData.repository.name,
         eventData.repository.owner.login,
         eventData.issue.html_url,
@@ -80,7 +111,8 @@ const run = async () => {
         eventData.issue.user.login,
         eventData.comment.html_url,
         eventData.comment.body,
-        eventData.comment.user.login
+        eventData.comment.user.login,
+        ACCESS_TOKEN
       );
 
       core.info("Success!");
