@@ -10,7 +10,7 @@ const { readFile } = require("./utils");
 const {
   HANDLED_ACTION_TYPES,
   DIGEST_ISSUE_REPO,
-  GITHUB_PAT,
+  ACCESS_TOKEN,
 } = require("./constants");
 
 const run = async () => {
@@ -77,7 +77,7 @@ const run = async () => {
       let configuredIssueOwner;
       let configuredIssueRepo;
 
-      if (DIGEST_ISSUE_REPO && GITHUB_PAT) {
+      if (DIGEST_ISSUE_REPO && ACCESS_TOKEN) {
         try {
           [configuredIssueOwner, configuredIssueRepo] = url
             .parse(DIGEST_ISSUE_REPO)
@@ -102,7 +102,7 @@ const run = async () => {
         eventData.comment.html_url,
         eventData.comment.body,
         eventData.comment.user.login,
-        GITHUB_PAT
+        ACCESS_TOKEN
       );
 
       core.info("Success!");

@@ -22,7 +22,7 @@ const PROMPT_THRESHOLD = process.env.PROMPT_THRESHOLD || 500;
 
 const DIGEST_ISSUE_REPO = process.env.DIGEST_ISSUE_REPO || null;
 
-const GITHUB_PAT = process.env.GITHUB_PAT || null;
+const ACCESS_TOKEN = process.env.ACCESS_TOKEN || null;
 
 module.exports = {
   SIZES,
@@ -30,5 +30,5 @@ module.exports = {
   HANDLED_ACTION_TYPES,
   PROMPT_THRESHOLD,
   DIGEST_ISSUE_REPO,
-  GITHUB_PAT,
+  ACCESS_TOKEN,
 };
