@@ -47,8 +47,8 @@ const handleReasonComment = async (
 
   core.info(
     existingIssue
-      ? "No existing digest issue found."
-      : "Existing digest issue found!"
+      ? "Existing digest issue found!"
+      : "No existing digest issue found."
   );
 
   let newIssue;
@@ -57,8 +57,8 @@ const handleReasonComment = async (
     core.info("Creating new digest issue...");
 
     newIssue = await (patOctokit || octokit).issues.create({
-      issueOwner,
-      issueRepo,
+      owner: issueOwner,
+      repo: issueRepo,
       title: "[ PR Size Helper ]: Digest",
       body: `Welcome to your PR Size Helper Digest!
 
@@ -79,8 +79,8 @@ _Note: The title of this issue is important. If you decide to change it, the PR 
   core.info("Leaving reason comment...");
 
   const comment = await (patOctokit || octokit).issues.createComment({
-    issueOwner,
-    issueRepo,
+    owner: issueOwner,
+    repo: issueRepo,
     issue_number: existingIssue ? existingIssue.number : newIssue.data.number,
     body: `## ${prUrl}
 
