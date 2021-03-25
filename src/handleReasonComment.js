@@ -1,5 +1,7 @@
 const handleReasonComment = async (
   octokit,
+  issueRepo,
+  issueOwner,
   repo,
   owner,
   prUrl,
@@ -8,10 +10,22 @@ const handleReasonComment = async (
   prAuthorLogin,
   reasonCommentUrl,
   reasonCommentBody,
-  reasonCommentAuthorLogin
+  reasonCommentAuthorLogin,
+  githubPAT
 ) => {
-  const existingIssues = await octokit.search.issuesAndPullRequests({
-    q: `is:open is:issue repo:${owner}/${repo} in:title [ PR Size Helper ]: Digest`,
+  let patOctokit;
+
+  if (githubPAT) {
+    patOctokit = new Octokit({
+      auth: `token ${githubPAT}`,
+      userAgent: "levindixon/pr-size-helper-action",
+    });
+  }
+
+  const existingIssues = await (
+    patOctokit || octokit
+  ).search.issuesAndPullRequests({
+    q: `is:open is:issue repo:${issueOwner}/${issueRepo} in:title [ PR Size Helper ]: Digest`,
   });
 
   const existingIssue = existingIssues.data.items.find(
@@ -21,26 +35,29 @@ const handleReasonComment = async (
   let newIssue;
 
   if (!existingIssue) {
-    newIssue = await octokit.issues.create({
-      owner,
-      repo,
+    newIssue = await (patOctokit || octokit).issues.create({
+      issueOwner,
+      issueRepo,
       title: "[ PR Size Helper ]: Digest",
       body: `Welcome to your PR Size Helper Digest!
 
 This issue collects and indexes all of the \`!reason\` prefixed comments left in pull requests.
-
-Here are some helpful links:
+${
+  issueRepo !== repo
+    ? ``
+    : `Here are some helpful links:
 
 - All **open** PRs labelled [\`size/XXL\`](https://github.com/${owner}/${repo}/pulls?q=is%3Apr+is%3Aopen+label%3Asize%2FXXL) [\`size/XL\`](https://github.com/${owner}/${repo}/pulls?q=is%3Apr+is%3Aopen+label%3Asize%2FXL) [\`size/L\`](https://github.com/${owner}/${repo}/pulls?q=is%3Apr+is%3Aopen+label%3Asize%2FL) [\`size/M\`](https://github.com/${owner}/${repo}/pulls?q=is%3Apr+is%3Aopen+label%3Asize%2FM) [\`size/S\`](https://github.com/${owner}/${repo}/pulls?q=is%3Apr+is%3Aopen+label%3Asize%2FS) [\`size/XS\`](https://github.com/${owner}/${repo}/pulls?q=is%3Apr+is%3Aopen+label%3Asize%2FXS)
-- All **closed** PRs labelled [\`size/XXL\`](https://github.com/${owner}/${repo}/pulls?q=is%3Apr+is%3Aclosed+label%3Asize%2FXXL) [\`size/XL\`](https://github.com/${owner}/${repo}/pulls?q=is%3Apr+is%3Aclosed+label%3Asize%2FXL) [\`size/L\`](https://github.com/${owner}/${repo}/pulls?q=is%3Apr+is%3Aclosed+label%3Asize%2FL) [\`size/M\`](https://github.com/${owner}/${repo}/pulls?q=is%3Apr+is%3Aclosed+label%3Asize%2FM) [\`size/S\`](https://github.com/${owner}/${repo}/pulls?q=is%3Apr+is%3Aclosed+label%3Asize%2FS) [\`size/XS\`](https://github.com/${owner}/${repo}/pulls?q=is%3Apr+is%3Aclosed+label%3Asize%2FXS)
+- All **closed** PRs labelled [\`size/XXL\`](https://github.com/${owner}/${repo}/pulls?q=is%3Apr+is%3Aclosed+label%3Asize%2FXXL) [\`size/XL\`](https://github.com/${owner}/${repo}/pulls?q=is%3Apr+is%3Aclosed+label%3Asize%2FXL) [\`size/L\`](https://github.com/${owner}/${repo}/pulls?q=is%3Apr+is%3Aclosed+label%3Asize%2FL) [\`size/M\`](https://github.com/${owner}/${repo}/pulls?q=is%3Apr+is%3Aclosed+label%3Asize%2FM) [\`size/S\`](https://github.com/${owner}/${repo}/pulls?q=is%3Apr+is%3Aclosed+label%3Asize%2FS) [\`size/XS\`](https://github.com/${owner}/${repo}/pulls?q=is%3Apr+is%3Aclosed+label%3Asize%2FXS)`
+}
 
 _Note: The title of this issue is important. If you decide to change it, the PR Size Helper action will create a new "[ PR Size Helper ]: Digest" issue the next time someone creates a \`!reason\` prefixed PR comment._`,
     });
   }
 
-  const comment = await octokit.issues.createComment({
-    owner,
-    repo,
+  const comment = await (patOctokit || octokit).issues.createComment({
+    issueOwner,
+    issueRepo,
     issue_number: existingIssue ? existingIssue.number : newIssue.data.number,
     body: `## ${prUrl}
 
