@@ -82,9 +82,13 @@ const run = async () => {
         core.info("DIGEST_ISSUE_REPO and ACCESS_TOKEN provided...");
         core.info(`Parsing DIGEST_ISSUE_REPO: ${DIGEST_ISSUE_REPO}`);
         try {
-          [configuredIssueOwner, configuredIssueRepo] = url
+          configuredIssueOwner = url
             .parse(DIGEST_ISSUE_REPO)
-            .pathname.split("/");
+            .pathname.split("/")[1];
+
+          configuredIssueRepo = url
+            .parse(DIGEST_ISSUE_REPO)
+            .pathname.split("/")[2];
 
           core.info(`configuredIssueOwner is: ${configuredIssueOwner}`);
           core.info(`configuredIssueRepo is : ${configuredIssueRepo}`);
