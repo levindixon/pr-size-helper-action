@@ -4,6 +4,29 @@ This action adds [size labels](https://github.com/kubernetes/kubernetes/labels?q
 
 The end goal is to proactively capture reasons why pull requests are above 1000 lines of additions + deletions and to index all of those reasons in one easy to find place.
 
+## Demo
+
+**1. A contributor creates a new PR:**
+
+![a large pr is created](https://user-images.githubusercontent.com/1746081/112671818-e7432600-8e1f-11eb-8ca4-d6849eb77b14.png)
+
+
+**2. pr-size-helper-action labels it with a (configurable) `size/` label:**
+
+![pr is labeled with size label](https://user-images.githubusercontent.com/1746081/112671828-ee6a3400-8e1f-11eb-9225-e3021fc31896.png)
+
+**3. If the PR crosses a (configurable) change size threshold the PR creator is prompted to provide more context:**
+
+![action prompts author for reason comment](https://user-images.githubusercontent.com/1746081/112671845-f629d880-8e1f-11eb-9bd7-487b682681c2.png)
+
+**4. When a `!reason` comment is provided, pr-size-helper-action captures the comment in a digest issue (with configurable destination):**
+
+![reason comment is provided and captured](https://user-images.githubusercontent.com/1746081/112671861-fb872300-8e1f-11eb-9ec8-6b720ac99a90.png)
+
+**5. The comment is added to the digest issue along with all other `!reason` comments:**
+
+![digest issue displays all reason comments](https://user-images.githubusercontent.com/1746081/112671878-ff1aaa00-8e1f-11eb-884f-5e6d1f867809.png)
+
 ## Usage
 
 Create two workflow files:
