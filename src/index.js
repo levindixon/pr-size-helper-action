@@ -53,6 +53,12 @@ const run = async () => {
     if (eventData.pull_request) {
       core.info("Handling PR...");
 
+      const authorLogins = process.env.AUTHOR_LOGINS.split(" ")
+      if (!authorLogins.includes(eventData.pull_request.user.login)) {
+        core.info("PR author is not in AUTHOR_LOGINS, ignoring...");
+        return;
+      }
+
       await handlePR(
         octokit,
         process.env.IGNORED,
