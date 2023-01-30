@@ -54,8 +54,8 @@ const run = async () => {
       core.info("Handling PR...");
 
       const authorLogins = process.env.AUTHOR_LOGINS.split(" ")
-      core.debug(authorLogins.toString())
-      core.debug(eventData.pull_request.user.login)
+      core.debug(`Allowed authors: ${authorLogins.toString()}`)
+      core.debug(`PR author: ${eventData.pull_request.user.login}`)
       if (!authorLogins.includes(eventData.pull_request.user.login)) {
         core.info(`PR author ${eventData.pull_request.user.login} is not in AUTHOR_LOGINS (${authorLogins}), ignoring...`);
         return;
