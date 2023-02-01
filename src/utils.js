@@ -38,7 +38,10 @@ const parseIgnored = (str = "") => {
   return isIgnored;
 };
 
-const getChangedLines = (isIgnored, diff) => {
+const getChangedLines = (isIgnored, diff, ignoreCommentLines) => {
+  const filterRegex = ignoreCommentLines ?
+    /^[+-](?!\s*#).*/ :
+    /^[+-].*/
   return Diff.parsePatch(diff)
     .flatMap((file) =>
       isIgnored(file.oldFileName) && isIgnored(file.newFileName)
@@ -46,7 +49,7 @@ const getChangedLines = (isIgnored, diff) => {
         : file.hunks
     )
     .flatMap((hunk) => hunk.lines)
-    .filter((line) => line[0] === "+" || line[0] === "-").length;
+    .filter((line) => filterRegex.test(line))
 };
 
 const getSizeLabel = (changedLines) => {
