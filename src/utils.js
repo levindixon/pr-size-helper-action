@@ -8,9 +8,13 @@ const globrexOptions = { extended: true, globstar: true };
 
 const matchLine = (line, fileName) => {
   if (IGNORE_COMMENT_LINES) {
+    core.debug("Ignore comment lines set to true.")
     const ext = fileName.split('.').pop();
     const pattern = IGNORE_COMMENT_PATTERN_MAP.get(ext)
     if (pattern) {
+      core.debug("Found ignore comment pattern for file extension: " + ext)
+      const result = pattern.test(line)
+      core.debug("Ignore comment pattern result: " + result + ", line: " + line)
       return pattern.test(line)
     }
   }

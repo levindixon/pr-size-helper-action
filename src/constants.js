@@ -32,7 +32,7 @@ const COMMENT_CHAR_MAP = {
 
 const IGNORE_COMMENT_PATTERN_MAP = COMMENT_CHAR_MAP.entries()
   .reduce((map, [ext, commentChar]) => {
-    map.set(ext, new RegExp(`^[+-](?!\s*${commentChar}).*`))
+    return map.set(ext, new RegExp(`^[+-](?!\s*${commentChar}).*`))
   }, new Map())
 
 module.exports = {
