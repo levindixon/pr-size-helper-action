@@ -8228,7 +8228,7 @@ const getChangedLines = (isIgnored, diff) => {
       return file.hunks
         .flatMap(hunk => hunk.lines)
         .filter(line => matchLine(line, file.newFileName))
-    })
+    }).length
 };
 
 const getSizeLabel = (changedLines) => {
