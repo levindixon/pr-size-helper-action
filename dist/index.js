@@ -8166,6 +8166,7 @@ run();
 const fs = __nccwpck_require__(5747);
 const globrex = __nccwpck_require__(3927);
 const Diff = __nccwpck_require__(1672);
+const core = __nccwpck_require__(2186);
 
 const { SIZES, IGNORE_COMMENT_LINES, IGNORE_COMMENT_PATTERN_MAP } = __nccwpck_require__(4438);
 

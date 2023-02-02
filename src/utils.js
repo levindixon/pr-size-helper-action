@@ -1,6 +1,7 @@
 const fs = require("fs");
 const globrex = require("globrex");
 const Diff = require("diff");
+const core = require("@actions/core");
 
 const { SIZES, IGNORE_COMMENT_LINES, IGNORE_COMMENT_PATTERN_MAP } = require("./constants");
 
