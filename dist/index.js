@@ -7784,6 +7784,17 @@ const DIGEST_ISSUE_REPO = process.env.DIGEST_ISSUE_REPO || null;
 
 const ACCESS_TOKEN = process.env.ACCESS_TOKEN || null;
 
+const IGNORE_COMMENT_LINES = process.env.IGNORE_COMMENT_LINES || null;
+
+const COMMENT_CHAR_MAP = {
+  "rb": "#"
+}
+
+const IGNORE_COMMENT_PATTERN_MAP = COMMENT_CHAR_MAP.entries()
+  .reduce((map, [ext, commentChar]) => {
+    return map.set(ext, new RegExp(`^[+-](?!\s*${commentChar}).*`))
+  }, new Map())
+
 module.exports = {
   SIZES,
   LABEL_COLORS,
@@ -7791,6 +7802,8 @@ module.exports = {
   PROMPT_THRESHOLD,
   DIGEST_ISSUE_REPO,
   ACCESS_TOKEN,
+  IGNORE_COMMENT_LINES,
+  IGNORE_COMMENT_PATTERN_MAP
 };
 
 
@@ -8154,9 +8167,24 @@ const fs = __nccwpck_require__(5747);
 const globrex = __nccwpck_require__(3927);
 const Diff = __nccwpck_require__(1672);
 
-const { SIZES } = __nccwpck_require__(4438);
+const { SIZES, IGNORE_COMMENT_LINES, IGNORE_COMMENT_PATTERN_MAP } = __nccwpck_require__(4438);
 
 const globrexOptions = { extended: true, globstar: true };
+
+const matchLine = (line, fileName) => {
+  if (IGNORE_COMMENT_LINES) {
+    core.debug("Ignore comment lines set to true.")
+    const ext = fileName.split('.').pop();
+    const pattern = IGNORE_COMMENT_PATTERN_MAP.get(ext)
+    if (pattern) {
+      core.debug("Found ignore comment pattern for file extension: " + ext)
+      const result = pattern.test(line)
+      core.debug("Ignore comment pattern result: " + result + ", line: " + line)
+      return pattern.test(line)
+    }
+  }
+  return line.startsWith("+") || line.startsWith("-");
+}
 
 const parseIgnored = (str = "") => {
   const ignored = str
@@ -8192,13 +8220,14 @@ const parseIgnored = (str = "") => {
 
 const getChangedLines = (isIgnored, diff) => {
   return Diff.parsePatch(diff)
-    .flatMap((file) =>
-      isIgnored(file.oldFileName) && isIgnored(file.newFileName)
-        ? []
-        : file.hunks
-    )
-    .flatMap((hunk) => hunk.lines)
-    .filter((line) => line[0] === "+" || line[0] === "-").length;
+    .flatMap(file => {
+      if (isIgnored(file.oldFileName) && isIgnored(file.newFileName)) {
+        return [];
+      }
+      return file.hunks
+        .flatMap(hunk => hunk.lines)
+        .filter(line => matchLine(line, file.newFileName))
+    })
 };
 
 const getSizeLabel = (changedLines) => {
