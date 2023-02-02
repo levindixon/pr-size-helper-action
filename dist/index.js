@@ -7790,7 +7790,7 @@ const COMMENT_CHAR_MAP = {
   "rb": "#"
 }
 
-const IGNORE_COMMENT_PATTERN_MAP = COMMENT_CHAR_MAP.entries()
+const IGNORE_COMMENT_PATTERN_MAP = Object.entries(COMMENT_CHAR_MAP)
   .reduce((map, [ext, commentChar]) => {
     return map.set(ext, new RegExp(`^[+-](?!\s*${commentChar}).*`))
   }, new Map())
