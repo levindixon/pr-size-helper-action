@@ -24,6 +24,17 @@ const DIGEST_ISSUE_REPO = process.env.DIGEST_ISSUE_REPO || null;
 
 const ACCESS_TOKEN = process.env.ACCESS_TOKEN || null;
 
+const IGNORE_COMMENT_LINES = process.env.IGNORE_COMMENT_LINES || null;
+
+const COMMENT_CHAR_MAP = {
+  "rb": "#"
+}
+
+const IGNORE_COMMENT_PATTERN_MAP = COMMENT_CHAR_MAP.entries()
+  .reduce((map, [ext, commentChar]) => {
+    map.set(ext, new RegExp(`^[+-](?!\s*${commentChar}).*`))
+  }, new Map())
+
 module.exports = {
   SIZES,
   LABEL_COLORS,
@@ -31,4 +42,6 @@ module.exports = {
   PROMPT_THRESHOLD,
   DIGEST_ISSUE_REPO,
   ACCESS_TOKEN,
+  IGNORE_COMMENT_LINES,
+  IGNORE_COMMENT_PATTERN_MAP
 };

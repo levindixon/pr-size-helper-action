@@ -2,9 +2,20 @@ const fs = require("fs");
 const globrex = require("globrex");
 const Diff = require("diff");
 
-const { SIZES } = require("./constants");
+const { SIZES, IGNORE_COMMENT_LINES, IGNORE_COMMENT_PATTERN_MAP } = require("./constants");
 
 const globrexOptions = { extended: true, globstar: true };
+
+const matchLine = (line, fileName) => {
+  if (IGNORE_COMMENT_LINES) {
+    const ext = fileName.split('.').pop();
+    const pattern = IGNORE_COMMENT_PATTERN_MAP.get(ext)
+    if (pattern) {
+      return pattern.test(line)
+    }
+  }
+  return line.startsWith("+") || line.startsWith("-");
+}
 
 const parseIgnored = (str = "") => {
   const ignored = str
@@ -38,18 +49,16 @@ const parseIgnored = (str = "") => {
   return isIgnored;
 };
 
-const getChangedLines = (isIgnored, diff, ignoreCommentLines) => {
-  const filterRegex = ignoreCommentLines ?
-    /^[+-](?!\s*#).*/ :
-    /^[+-].*/
+const getChangedLines = (isIgnored, diff) => {
   return Diff.parsePatch(diff)
-    .flatMap((file) =>
-      isIgnored(file.oldFileName) && isIgnored(file.newFileName)
-        ? []
-        : file.hunks
-    )
-    .flatMap((hunk) => hunk.lines)
-    .filter((line) => filterRegex.test(line))
+    .flatMap(file => {
+      if (isIgnored(file.oldFileName) && isIgnored(file.newFileName)) {
+        return [];
+      }
+      return file.hunks
+        .flatMap(hunk => hunk.lines)
+        .filter(line => matchLine(line, file.newFileName))
+    })
 };
 
 const getSizeLabel = (changedLines) => {

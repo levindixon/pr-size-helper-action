@@ -16,8 +16,7 @@ const handlePR = async (
   repo,
   prNumber,
   prLabels,
-  prAuthorLogin,
-  ignoreCommentLines
+  prAuthorLogin
 ) => {
   const isIgnored = parseIgnored(ignored);
 
@@ -30,7 +29,7 @@ const handlePR = async (
     },
   });
 
-  const changedLines = getChangedLines(isIgnored, pullRequestDiff.data, ignoreCommentLines);
+  const changedLines = getChangedLines(isIgnored, pullRequestDiff.data);
 
   core.info(`Changed lines: ${changedLines}`);
 

@@ -68,8 +68,7 @@ const run = async () => {
         eventData.pull_request.base.repo.name,
         eventData.pull_request.number,
         eventData.pull_request.labels,
-        eventData.pull_request.user.login,
-        process.env.IGNORE_COMMENT_LINES
+        eventData.pull_request.user.login
       );
 
       core.info("Success!");
