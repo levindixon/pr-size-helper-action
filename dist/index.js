@@ -7784,6 +7784,8 @@ const DIGEST_ISSUE_REPO = process.env.DIGEST_ISSUE_REPO || null;
 
 const ACCESS_TOKEN = process.env.ACCESS_TOKEN || null;
 
+const FEEDBACK_LINK = process.env.REFERENCE_LINK || null;
+
 const IGNORE_COMMENT_LINES = process.env.IGNORE_COMMENT_LINES || null;
 
 const COMMENT_CHAR_MAP = {
@@ -7814,7 +7816,7 @@ module.exports = {
 
 const core = __nccwpck_require__(2186);
 
-const { LABEL_COLORS, PROMPT_THRESHOLD } = __nccwpck_require__(4438);
+const { LABEL_COLORS, PROMPT_THRESHOLD, FEEDBACK_LINK } = __nccwpck_require__(4438);
 const {
   parseIgnored,
   getChangedLines,
@@ -7874,13 +7876,23 @@ const handlePR = async (
     });
 
     if (changedLines >= PROMPT_THRESHOLD) {
+      let body = `👋 @${prAuthorLogin} this pull request exceeds ${PROMPT_THRESHOLD} significant lines of code.
+
+[Research](https://www.cabird.com/static/93aba3256c80506d3948983db34d3ba3/rigby2013convergent.pdf) has shown that this makes it harder for reviewers to provide quality feedback.
+
+We recommend that you reduce the size of this PR by separating commits into stacked PRs. 
+
+If that is not possible, please add a comment starting with "!reason" to describe why this PR is necessarily large.`
+
+      if (FEEDBACK_LINK) {
+        body += `\n\nFor more information and to provide feedback, please visit ${FEEDBACK_LINK}`
+      }
+
       await octokit.issues.createComment({
         owner,
         repo,
         issue_number: prNumber,
-        body: `👋 @${prAuthorLogin} this pull request is a bit large 😮
-
-If you have time, please leave a comment prefixed with \`!reason\` explaining why, thanks!`,
+        body: body
       });
     }
   }
