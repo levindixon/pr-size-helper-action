@@ -24,7 +24,7 @@ const DIGEST_ISSUE_REPO = process.env.DIGEST_ISSUE_REPO || null;
 
 const ACCESS_TOKEN = process.env.ACCESS_TOKEN || null;
 
-const FEEDBACK_LINK = process.env.REFERENCE_LINK || null;
+const FEEDBACK_LINK = process.env.FEEDBACK_LINK || null;
 
 const IGNORE_COMMENT_LINES = process.env.IGNORE_COMMENT_LINES || null;
 
