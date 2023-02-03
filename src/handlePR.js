@@ -64,9 +64,7 @@ const handlePR = async (
 
 [Research](https://www.cabird.com/static/93aba3256c80506d3948983db34d3ba3/rigby2013convergent.pdf) has shown that this makes it harder for reviewers to provide quality feedback.
 
-We recommend that you reduce the size of this PR by separating commits into stacked PRs. 
-
-If that is not possible, please add a comment starting with "!reason" to describe why this PR is necessarily large.`
+We recommend that you reduce the size of this PR by separating commits into stacked PRs. If that is not possible, please add a comment starting with "!reason" to describe why this PR is necessarily large.`
 
       if (FEEDBACK_LINK) {
         body += `\n\nFor more information and to provide feedback, please visit ${FEEDBACK_LINK}`
