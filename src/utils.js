@@ -20,7 +20,7 @@ const matchLine = (line, fileName) => {
     }
   }
   // Return any lines that start with +/- that have any non-whitespace characters (i.e. whitespace changes are ignored)
-  return /[+-]\s*\S+/.test(line);
+  return /^[+-]\s*\S+/.test(line);
 }
 
 const parseIgnored = (str = "") => {
