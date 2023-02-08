@@ -8195,7 +8195,8 @@ const matchLine = (line, fileName) => {
       return pattern.test(line)
     }
   }
-  return line.startsWith("+") || line.startsWith("-");
+  // Return any lines that start with +/- that have any non-whitespace characters (i.e. whitespace changes are ignored)
+  return /^[+-]\s*\S+/.test(line);
 }
 
 const parseIgnored = (str = "") => {
