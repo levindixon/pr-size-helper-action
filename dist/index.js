@@ -8183,6 +8183,10 @@ const { SIZES, IGNORE_COMMENT_LINES, IGNORE_COMMENT_PATTERN_MAP } = __nccwpck_re
 
 const globrexOptions = { extended: true, globstar: true };
 
+const defaultTest = line => {
+  return /^[+-]\s*\S+/.test(line);
+}
+
 const matchLine = (line, fileName) => {
   if (IGNORE_COMMENT_LINES) {
     core.debug("Ignore comment lines set to true.")
@@ -8192,11 +8196,11 @@ const matchLine = (line, fileName) => {
       core.debug("Found ignore comment pattern for file extension: " + ext)
       const result = pattern.test(line)
       core.debug("Ignore comment pattern result: " + result + ", line: " + line)
-      return pattern.test(line)
+      return pattern.test(line) || defaultTest(line);
     }
   }
   // Return any lines that start with +/- that have any non-whitespace characters (i.e. whitespace changes are ignored)
-  return /^[+-]\s*\S+/.test(line);
+  return defaultTest(line);
 }
 
 const parseIgnored = (str = "") => {
