@@ -8196,7 +8196,7 @@ const matchLine = (line, fileName) => {
       core.debug("Found ignore comment pattern for file extension: " + ext)
       const result = pattern.test(line)
       core.debug("Ignore comment pattern result: " + result + ", line: " + line)
-      return pattern.test(line) || defaultTest(line);
+      return pattern.test(line) && defaultTest(line)
     }
   }
   // Return any lines that start with +/- that have any non-whitespace characters (i.e. whitespace changes are ignored)
