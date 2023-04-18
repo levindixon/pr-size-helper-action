@@ -8,7 +8,7 @@ const { paginateRest } = require('@octokit/plugin-paginate-rest');
 const handleReasonComment = require("./handleReasonComment");
 const handlePR = require("./handlePR");
 
-const { readFile } = require("./utils");
+const { readFile, fetchTeamMembers } = require("./utils");
 const {
   HANDLED_ACTION_TYPES,
   DIGEST_ISSUE_REPO,
@@ -55,11 +55,18 @@ const run = async () => {
     if (eventData.pull_request) {
       core.info("Handling PR...");
 
-      const authorLogins = process.env.AUTHOR_LOGINS.split(" ")
-      core.debug(`Allowed authors: ${authorLogins.toString()}`)
+      const teams = process.env.TEAMS.split(" ")
+      core.debug(`Allowed teams: ${teams.toString()}`)
+
+      const individuals = process.env.AUTHOR_LOGINS.split(" ")
+      core.debug(`Allowed individiuals ${individuals.toString()}`)
+
+      const allowedAuthors = fetchTeamMembers(octokit, eventData.pull_request.base.repo.owner.login, teams) + individuals;
+      core.debug(`All allowed authors: ${allowedAuthors.toString()}`)
+
       core.debug(`PR author: ${eventData.pull_request.user.login}`)
-      if (!authorLogins.includes(eventData.pull_request.user.login)) {
-        core.info(`PR author ${eventData.pull_request.user.login} is not in AUTHOR_LOGINS (${authorLogins}), ignoring...`);
+      if (!allowedAuthors.includes(eventData.pull_request.user.login)) {
+        core.info(`Ignoring this PR because the author ${eventData.pull_request.user.login} has not opted into this workflow.`);
         return;
       }
 
