@@ -94,7 +94,7 @@ _Note: The title of this issue is important. If you decide to change it, the PR 
 
   core.info("Thanking reason author and linking to digest issue...");
 
-  await octokit.issues.createComment({
+  await octokit.rest.issues.createComment({
     owner,
     repo,
     issue_number: prNumber,

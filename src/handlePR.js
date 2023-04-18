@@ -20,7 +20,7 @@ const handlePR = async (
 ) => {
   const isIgnored = parseIgnored(ignored);
 
-  const pullRequestDiff = await octokit.pulls.get({
+  const pullRequestDiff = await octokit.rest.pulls.get({
     owner,
     repo,
     pull_number: prNumber,
@@ -52,7 +52,7 @@ const handlePR = async (
   if (add.length > 0) {
     core.info(`Adding labels: ${add}`);
 
-    await octokit.issues.addLabels({
+    await octokit.rest.issues.addLabels({
       owner,
       repo,
       issue_number: prNumber,
@@ -70,7 +70,7 @@ We recommend that you reduce the size of this PR by separating commits into stac
         body += `\n\nFor more information and to provide feedback, please visit ${FEEDBACK_LINK}`
       }
 
-      await octokit.issues.createComment({
+      await octokit.rest.issues.createComment({
         owner,
         repo,
         issue_number: prNumber,
@@ -83,7 +83,7 @@ We recommend that you reduce the size of this PR by separating commits into stac
     core.info(`Removing label: ${label}`);
 
     try {
-      await octokit.issues.removeLabel({
+      await octokit.rest.issues.removeLabel({
         owner,
         repo,
         issue_number: prNumber,

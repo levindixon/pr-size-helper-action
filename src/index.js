@@ -2,7 +2,8 @@ const process = require("process");
 const url = require("url");
 
 const core = require("@actions/core");
-const { Octokit } = require("@octokit/rest");
+const { Octokit } = require("@octokit/core");
+const { paginateRest } = require('@octokit/plugin-paginate-rest');
 
 const handleReasonComment = require("./handleReasonComment");
 const handlePR = require("./handlePR");
@@ -45,7 +46,8 @@ const run = async () => {
       return;
     }
 
-    const octokit = new Octokit({
+    const OctokitWithPagination = Octokit.plugin(paginateRest);
+    const octokit = new OctokitWithPagination({
       auth: `token ${GITHUB_TOKEN}`,
       userAgent: "levindixon/pr-size-helper-action",
     });
