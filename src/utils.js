@@ -118,6 +118,29 @@ const ensureLabelExists = async (octokit, repo, owner, name, color) => {
   }
 };
 
+const fetchTeamMembers = async (octokit, organization, teams) => {
+  const result = [];
+
+  for (const slug of teams) {
+    const memberIterator = octokit.paginate.iterator(
+      "GET /orgs/{org}/teams/{team_slug}/members",
+      {
+        org: organization,
+        team_slug: slug,
+        per_page: 100,
+      }
+    )
+
+    for await (const { data: members } of memberIterator)   {
+      for (const member of members) {
+        result.push(member.login)
+      }
+    }
+  }
+
+  return result;
+};
+
 const readFile = async (path) => {
   return new Promise((resolve, reject) => {
     fs.readFile(path, { encoding: "utf8" }, (err, data) => {
@@ -136,5 +159,6 @@ module.exports = {
   getSizeLabel,
   getLabelChanges,
   ensureLabelExists,
+  fetchTeamMembers,
   readFile,
 };
