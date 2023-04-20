@@ -7837,7 +7837,7 @@ const handlePR = async (
 ) => {
   const isIgnored = parseIgnored(ignored);
 
-  const pullRequestDiff = await octokit.pulls.get({
+  const pullRequestDiff = await octokit.rest.pulls.get({
     owner,
     repo,
     pull_number: prNumber,
@@ -7869,7 +7869,7 @@ const handlePR = async (
   if (add.length > 0) {
     core.info(`Adding labels: ${add}`);
 
-    await octokit.issues.addLabels({
+    await octokit.rest.issues.addLabels({
       owner,
       repo,
       issue_number: prNumber,
@@ -7887,7 +7887,7 @@ We recommend that you reduce the size of this PR by separating commits into stac
         body += `\n\nFor more information and to provide feedback, please visit ${FEEDBACK_LINK}`
       }
 
-      await octokit.issues.createComment({
+      await octokit.rest.issues.createComment({
         owner,
         repo,
         issue_number: prNumber,
@@ -7900,7 +7900,7 @@ We recommend that you reduce the size of this PR by separating commits into stac
     core.info(`Removing label: ${label}`);
 
     try {
-      await octokit.issues.removeLabel({
+      await octokit.rest.issues.removeLabel({
         owner,
         repo,
         issue_number: prNumber,
@@ -8016,7 +8016,7 @@ _Note: The title of this issue is important. If you decide to change it, the PR 
 
   core.info("Thanking reason author and linking to digest issue...");
 
-  await octokit.issues.createComment({
+  await octokit.rest.issues.createComment({
     owner,
     repo,
     issue_number: prNumber,
@@ -8036,12 +8036,13 @@ const process = __nccwpck_require__(1765);
 const url = __nccwpck_require__(8835);
 
 const core = __nccwpck_require__(2186);
-const { Octokit } = __nccwpck_require__(5375);
+const { Octokit } = __nccwpck_require__(6762);
+const { paginateRest } = __nccwpck_require__(4193);
 
 const handleReasonComment = __nccwpck_require__(3953);
 const handlePR = __nccwpck_require__(9680);
 
-const { readFile } = __nccwpck_require__(1608);
+const { readFile, fetchTeamMembers } = __nccwpck_require__(1608);
 const {
   HANDLED_ACTION_TYPES,
   DIGEST_ISSUE_REPO,
@@ -8079,7 +8080,8 @@ const run = async () => {
       return;
     }
 
-    const octokit = new Octokit({
+    const OctokitWithPagination = Octokit.plugin(paginateRest);
+    const octokit = new OctokitWithPagination({
       auth: `token ${GITHUB_TOKEN}`,
       userAgent: "levindixon/pr-size-helper-action",
     });
@@ -8087,11 +8089,19 @@ const run = async () => {
     if (eventData.pull_request) {
       core.info("Handling PR...");
 
-      const authorLogins = process.env.AUTHOR_LOGINS.split(" ")
-      core.debug(`Allowed authors: ${authorLogins.toString()}`)
-      core.debug(`PR author: ${eventData.pull_request.user.login}`)
-      if (!authorLogins.includes(eventData.pull_request.user.login)) {
-        core.info(`PR author ${eventData.pull_request.user.login} is not in AUTHOR_LOGINS (${authorLogins}), ignoring...`);
+      const teams = (process.env.TEAMS || "").split(" ");
+      core.debug(`Allowed teams: ${teams.toString()}`);
+
+      const individuals = (process.env.AUTHOR_LOGINS || "").split(" ");
+      core.debug(`Allowed individiuals ${individuals.toString()}`);
+
+      const teamMembers = await fetchTeamMembers(octokit, eventData.pull_request.base.repo.owner.login, teams);
+      const allowedAuthors = teamMembers + individuals;
+      core.debug(`All allowed authors: ${allowedAuthors.toString()}`);
+
+      core.debug(`PR author: ${eventData.pull_request.user.login}`);
+      if (allowedAuthors.length > 0 && !allowedAuthors.includes(eventData.pull_request.user.login)) {
+        core.info(`Ignoring this PR because the author ${eventData.pull_request.user.login} has not opted into this workflow.`);
         return;
       }
 
@@ -8294,6 +8304,31 @@ const ensureLabelExists = async (octokit, repo, owner, name, color) => {
   }
 };
 
+const fetchTeamMembers = async (octokit, organization, teams) => {
+  const result = new Set();
+
+  const allMembers = await Promise.all(
+    teams.map((slug) => {
+      return octokit.paginate(
+        "GET /orgs/{org}/teams/{team_slug}/members",
+        {
+          org: organization,
+          team_slug: slug,
+          per_page: 100,
+        }
+      );
+    })
+  );
+
+  for (const members of allMembers) {
+    for (const m of members) {
+      result.add(m.login);
+    }
+  }
+
+  return Array.from(result);
+};
+
 const readFile = async (path) => {
   return new Promise((resolve, reject) => {
     fs.readFile(path, { encoding: "utf8" }, (err, data) => {
@@ -8312,6 +8347,7 @@ module.exports = {
   getSizeLabel,
   getLabelChanges,
   ensureLabelExists,
+  fetchTeamMembers,
   readFile,
 };
 

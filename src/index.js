@@ -2,12 +2,13 @@ const process = require("process");
 const url = require("url");
 
 const core = require("@actions/core");
-const { Octokit } = require("@octokit/rest");
+const { Octokit } = require("@octokit/core");
+const { paginateRest } = require('@octokit/plugin-paginate-rest');
 
 const handleReasonComment = require("./handleReasonComment");
 const handlePR = require("./handlePR");
 
-const { readFile } = require("./utils");
+const { readFile, fetchTeamMembers } = require("./utils");
 const {
   HANDLED_ACTION_TYPES,
   DIGEST_ISSUE_REPO,
@@ -45,7 +46,8 @@ const run = async () => {
       return;
     }
 
-    const octokit = new Octokit({
+    const OctokitWithPagination = Octokit.plugin(paginateRest);
+    const octokit = new OctokitWithPagination({
       auth: `token ${GITHUB_TOKEN}`,
       userAgent: "levindixon/pr-size-helper-action",
     });
@@ -53,11 +55,19 @@ const run = async () => {
     if (eventData.pull_request) {
       core.info("Handling PR...");
 
-      const authorLogins = process.env.AUTHOR_LOGINS.split(" ")
-      core.debug(`Allowed authors: ${authorLogins.toString()}`)
-      core.debug(`PR author: ${eventData.pull_request.user.login}`)
-      if (!authorLogins.includes(eventData.pull_request.user.login)) {
-        core.info(`PR author ${eventData.pull_request.user.login} is not in AUTHOR_LOGINS (${authorLogins}), ignoring...`);
+      const teams = (process.env.TEAMS || "").split(" ");
+      core.debug(`Allowed teams: ${teams.toString()}`);
+
+      const individuals = (process.env.AUTHOR_LOGINS || "").split(" ");
+      core.debug(`Allowed individiuals ${individuals.toString()}`);
+
+      const teamMembers = await fetchTeamMembers(octokit, eventData.pull_request.base.repo.owner.login, teams);
+      const allowedAuthors = teamMembers + individuals;
+      core.debug(`All allowed authors: ${allowedAuthors.toString()}`);
+
+      core.debug(`PR author: ${eventData.pull_request.user.login}`);
+      if (allowedAuthors.length > 0 && !allowedAuthors.includes(eventData.pull_request.user.login)) {
+        core.info(`Ignoring this PR because the author ${eventData.pull_request.user.login} has not opted into this workflow.`);
         return;
       }
 
