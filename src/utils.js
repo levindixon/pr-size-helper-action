@@ -119,26 +119,28 @@ const ensureLabelExists = async (octokit, repo, owner, name, color) => {
 };
 
 const fetchTeamMembers = async (octokit, organization, teams) => {
-  const result = [];
+  const result = new Set();
 
-  for (const slug of teams) {
-    const memberIterator = octokit.paginate.iterator(
-      "GET /orgs/{org}/teams/{team_slug}/members",
-      {
-        org: organization,
-        team_slug: slug,
-        per_page: 100,
-      }
-    )
+  const allMembers = await Promise.all(
+    teams.map((slug) => {
+      return octokit.paginate(
+        "GET /orgs/{org}/teams/{team_slug}/members",
+        {
+          org: organization,
+          team_slug: slug,
+          per_page: 100,
+        }
+      );
+    })
+  );
 
-    for await (const { data: members } of memberIterator)   {
-      for (const member of members) {
-        result.push(member.login)
-      }
+  for (const members of allMembers) {
+    for (const m of members) {
+      result.add(m.login);
     }
   }
 
-  return result;
+  return Array.from(result);
 };
 
 const readFile = async (path) => {
