@@ -20,7 +20,7 @@ const handlePR = async (
 ) => {
   const isIgnored = parseIgnored(ignored);
 
-  const pullRequestDiff = await octokit.pulls.get({
+  const pullRequestDiff = await octokit.rest.pulls.get({
     owner,
     repo,
     pull_number: prNumber,
@@ -52,7 +52,7 @@ const handlePR = async (
   if (add.length > 0) {
     core.info(`Adding labels: ${add}`);
 
-    await octokit.issues.addLabels({
+    await octokit.rest.issues.addLabels({
       owner,
       repo,
       issue_number: prNumber,
@@ -60,7 +60,7 @@ const handlePR = async (
     });
 
     if (score >= PROMPT_THRESHOLD) {
-      let body = `👋 @${prAuthorLogin} this pull request exceeds ${PROMPT_THRESHOLD} significant lines of code.
+      let body = `👋 @${prAuthorLogin} this pull request changes ${changedLines} significant lines of code, which exceeds the recommended threshold of ${PROMPT_THRESHOLD}.
 
 [Research](https://www.cabird.com/static/93aba3256c80506d3948983db34d3ba3/rigby2013convergent.pdf) has shown that this makes it harder for reviewers to provide quality feedback.
 
@@ -70,7 +70,7 @@ We recommend that you reduce the size of this PR by separating commits into stac
         body += `\n\nFor more information and to provide feedback, please visit ${FEEDBACK_LINK}`
       }
 
-      await octokit.issues.createComment({
+      await octokit.rest.issues.createComment({
         owner,
         repo,
         issue_number: prNumber,
@@ -83,7 +83,7 @@ We recommend that you reduce the size of this PR by separating commits into stac
     core.info(`Removing label: ${label}`);
 
     try {
-      await octokit.issues.removeLabel({
+      await octokit.rest.issues.removeLabel({
         owner,
         repo,
         issue_number: prNumber,
