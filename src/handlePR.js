@@ -60,7 +60,7 @@ const handlePR = async (
     });
 
     if (changedLines >= PROMPT_THRESHOLD) {
-      let body = `👋 @${prAuthorLogin} this pull request exceeds ${PROMPT_THRESHOLD} significant lines of code.
+      let body = `👋 @${prAuthorLogin} this pull request has changed ${changedLines} significant lines of code, which exceeds the recommended threshold of ${PROMPT_THRESHOLD}.
 
 [Research](https://www.cabird.com/static/93aba3256c80506d3948983db34d3ba3/rigby2013convergent.pdf) has shown that this makes it harder for reviewers to provide quality feedback.
 
