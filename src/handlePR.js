@@ -3,7 +3,7 @@ const core = require("@actions/core");
 const { LABEL_COLORS, PROMPT_THRESHOLD, FEEDBACK_LINK } = require("./constants");
 const {
   parseIgnored,
-  getChangedLines,
+  scoreChanges,
   getSizeLabel,
   getLabelChanges,
   ensureLabelExists,
@@ -25,15 +25,15 @@ const handlePR = async (
     repo,
     pull_number: prNumber,
     headers: {
-      accept: "application/vnd.github.v3.diff",
+      accept: "application/vnd.github.diff",
     },
   });
 
-  const changedLines = getChangedLines(isIgnored, pullRequestDiff.data);
+  const score = scoreChanges(isIgnored, pullRequestDiff.data);
 
-  core.info(`Changed lines: ${changedLines}`);
+  core.info(`Change score: ${score}`);
 
-  const sizeLabel = getSizeLabel(changedLines);
+  const sizeLabel = getSizeLabel(score);
 
   core.info(`Matching label: ${sizeLabel}`);
 
@@ -59,7 +59,7 @@ const handlePR = async (
       labels: add,
     });
 
-    if (changedLines >= PROMPT_THRESHOLD) {
+    if (score >= PROMPT_THRESHOLD) {
       let body = `👋 @${prAuthorLogin} this pull request exceeds ${PROMPT_THRESHOLD} significant lines of code.
 
 [Research](https://www.cabird.com/static/93aba3256c80506d3948983db34d3ba3/rigby2013convergent.pdf) has shown that this makes it harder for reviewers to provide quality feedback.

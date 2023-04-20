@@ -28,8 +28,16 @@ const FEEDBACK_LINK = process.env.FEEDBACK_LINK || null;
 
 const IGNORE_COMMENT_LINES = process.env.IGNORE_COMMENT_LINES || null;
 
+const GITHUB_ACTIONS = process.env.GITHUB_ACTIONS === "true";
+
+// file extension => comment character for that file type
 const COMMENT_CHAR_MAP = {
   "rb": "#"
+}
+
+// file extension => regex that matches test file naming conventions
+const TEST_MATCH_MAP = {
+  "rb": /_test\.rb$/
 }
 
 const IGNORE_COMMENT_PATTERN_MAP = Object.entries(COMMENT_CHAR_MAP)
@@ -46,5 +54,7 @@ module.exports = {
   ACCESS_TOKEN,
   IGNORE_COMMENT_LINES,
   IGNORE_COMMENT_PATTERN_MAP,
-  FEEDBACK_LINK
+  FEEDBACK_LINK,
+  TEST_MATCH_MAP,
+  GITHUB_ACTIONS
 };

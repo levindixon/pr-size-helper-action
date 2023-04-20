@@ -1,9 +1,13 @@
 const fs = require("fs");
+const process = require("process");
 const globrex = require("globrex");
 const Diff = require("diff");
-const core = require("@actions/core");
 
-const { SIZES, IGNORE_COMMENT_LINES, IGNORE_COMMENT_PATTERN_MAP } = require("./constants");
+const { SIZES, IGNORE_COMMENT_LINES, IGNORE_COMMENT_PATTERN_MAP, TEST_MATCH_MAP, GITHUB_ACTIONS } = require("./constants");
+
+const debug = GITHUB_ACTIONS === 'true' ? 
+  require("@actions/core").debug : 
+  console.log 
 
 const globrexOptions = { extended: true, globstar: true };
 
@@ -11,15 +15,19 @@ const defaultTest = line => {
   return /^[+-]\s*\S+/.test(line);
 }
 
+const singleWordTest = line => {
+  return /^[+-]\s*(["'`]?)\b\w+\b\1\S?$/.test(line);
+}
+
 const matchLine = (line, fileName) => {
   if (IGNORE_COMMENT_LINES) {
-    core.debug("Ignore comment lines set to true.")
+    debug("Ignore comment lines set to true.")
     const ext = fileName.split('.').pop();
     const pattern = IGNORE_COMMENT_PATTERN_MAP.get(ext)
     if (pattern) {
-      core.debug("Found ignore comment pattern for file extension: " + ext)
+      debug("Found ignore comment pattern for file extension: " + ext)
       const result = pattern.test(line)
-      core.debug("Ignore comment pattern result: " + result + ", line: " + line)
+      debug("Ignore comment pattern result: " + result + ", line: " + line)
       return pattern.test(line) && defaultTest(line)
     }
   }
@@ -59,17 +67,44 @@ const parseIgnored = (str = "") => {
   return isIgnored;
 };
 
-const getChangedLines = (isIgnored, diff) => {
-  return Diff.parsePatch(diff)
-    .flatMap(file => {
-      if (isIgnored(file.oldFileName) && isIgnored(file.newFileName)) {
-        return [];
+const isTestFile = (fileName) => {
+  const ext = fileName.split('.').pop()
+  const testMatch = TEST_MATCH_MAP[ext];
+  if (testMatch) {
+    return testMatch.test(fileName);
+  }
+  return false;
+}
+
+const singleWordDeduction = 0.5;
+const testFileDeduction = 0.5
+
+const scoreFile = (file) => (
+  file.hunks
+    .flatMap(hunk => hunk.lines)
+    .reduce((score, line) => {
+      let points = 0;
+      const matched = matchLine(line, file.newFileName)
+      if (matched) {
+        points++
+        if (singleWordTest(line)) {
+          debug(`Single word change detected: ${line} -- deducting ${singleWordDeduction} from score.`)
+          points -= singleWordDeduction;
+        }
+        if (isTestFile(file.newFileName)) {
+          debug(`Test file change detected: ${file.newFileName}: ${line} -- deducting ${testFileDeduction} from score.`)
+          points -= testFileDeduction;
+        }
       }
-      return file.hunks
-        .flatMap(hunk => hunk.lines)
-        .filter(line => matchLine(line, file.newFileName))
-    }).length
-};
+      return score + points
+    }, 0)
+)
+
+const scoreChanges = (isIgnored, diff) => (
+  Diff.parsePatch(diff)
+    .filter(file => !(isIgnored(file.oldFileName) && isIgnored(file.newFileName)))
+    .reduce((score, file) => score + scoreFile(file), 0)
+)
 
 const getSizeLabel = (changedLines) => {
   let label = null;
@@ -132,9 +167,9 @@ const readFile = async (path) => {
 
 module.exports = {
   parseIgnored,
-  getChangedLines,
+  scoreChanges,
   getSizeLabel,
   getLabelChanges,
   ensureLabelExists,
-  readFile,
+  readFile
 };
