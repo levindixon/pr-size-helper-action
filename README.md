@@ -1,5 +1,7 @@
 # PR Size Helper action
 
+**👴🏻 Proud grandparent of https://github.com/lerebear/sizeup-action (daugher of https://github.com/glortho/pr-size-helper-action), highly recommend going there first! ✨**
+
 This action adds [size labels](https://github.com/kubernetes/kubernetes/labels?q=size) to pull requests. If a pull requests is above 1000 lines of additions and deletions, the action will prompt the PR author for more context to help explain the size of the PR. If the author chooses to give additional context, the reason will be tracked along with all others in a digest issue.
 
 The end goal is to proactively capture reasons why pull requests are above 1000 lines of additions + deletions and to index all of those reasons in one easy to find place.
